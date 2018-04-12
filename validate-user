@@ -1,0 +1,22 @@
+#!/bin/bash 
+# instalar whois para usar mkpass
+
+# verifica si el usuario existe
+if id -u "$1" >/dev/null 2>&1; then
+	echo "el usuario existe"
+	
+	#Obtemos el salt del usuario leido, en el archivo /etc/shadow
+	salt=$(sudo grep $1 /etc/shadow | cut -d$ -f3)
+	#Obtemos la clave encriptada del usuario del fichero /etc/shadow
+	pass_shadow=$(sudo grep $1 /etc/shadow | cut -d: -f2)
+	#Encriptamos la clave leida con el salt obtenido del fichero /etc/shadow
+	#y con el mismo algoritmo de encriptacion sha-512
+	pass_encryp=$(mkpasswd -m sha-512 -S $salt $2)
+	if [ $pass_shadow = $pass_encryp ]; then   
+		echo "contraseña correcta"
+	else
+		echo "contraseña incorrecta"
+	fi 
+else 
+	echo "el usuario no existe" 
+fi
