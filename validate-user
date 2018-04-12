@@ -1,22 +1,61 @@
 #!/bin/bash 
-# instalar whois para usar mkpass
 
-# verifica si el usuario existe
-if id -u "$1" >/dev/null 2>&1; then
-	echo "el usuario existe"
-	
-	#Obtemos el salt del usuario leido, en el archivo /etc/shadow
-	salt=$(sudo grep $1 /etc/shadow | cut -d$ -f3)
-	#Obtemos la clave encriptada del usuario del fichero /etc/shadow
-	pass_shadow=$(sudo grep $1 /etc/shadow | cut -d: -f2)
-	#Encriptamos la clave leida con el salt obtenido del fichero /etc/shadow
-	#y con el mismo algoritmo de encriptacion sha-512
-	pass_encryp=$(mkpasswd -m sha-512 -S $salt $2)
-	if [ $pass_shadow = $pass_encryp ]; then   
-		echo "contraseña correcta"
-	else
-		echo "contraseña incorrecta"
-	fi 
-else 
-	echo "el usuario no existe" 
+clear
+echo -e "\e[1;36m";
+echo " ______                      _____           _       _    ";
+echo " |  ___|                    /  ___|         (_)     | |   ";
+echo " | |_ ___ _ __  _   _ _ __  \ \`--.  ___ _ __ _ _ __ | |_  ";
+echo " |  _/ _ \ '_ \| | | | '__|  \`--. \/ __| '__| | '_ \| __| ";
+echo " | ||  __/ | | | |_| | |    /\__/ / (__| |  | | |_) | |_  ";
+echo " \_| \___|_| |_|\__, |_|    \____/ \___|_|  |_| .__/ \__| ";
+echo "                 __/ |                        | |         ";
+echo "                |___/                         |_|         ";
+echo "                                                          ";
+echo "            +-+-+-+-+-+-+-+ +-+-+ +-+-+-+-+-+             ";
+echo "            |D|e|v|e|l|o|p| |b|y| |F|e|n|y|r|             ";
+echo "            +-+-+-+-+-+-+-+ +-+-+ +-+-+-+-+-+             ";
+echo
+echo -e "\e[0m";
+
+# instalar whois para usar mkpass
+WHOIS="whois"
+
+# verifica si whois esta instalado
+dpkg --get-selections $WHOIS 2> /dev/null | grep -o $WHOIS > /dev/null
+
+if [ $? -eq 0 ]; then
+    # verifica si el usuario existe
+    if id -u "$1" >/dev/null 2>&1; then
+        echo "el usuario existe"
+        #Obtemos el salt del usuario leido, en el archivo /etc/shadow
+        salt=$(sudo grep $1 /etc/shadow | cut -d$ -f3)
+        #Obtemos la clave encriptada del usuario del fichero /etc/shadow
+        pass_shadow=$(sudo grep $1 /etc/shadow | cut -d: -f2)
+        #Encriptamos la clave leida con el salt obtenido del fichero /etc/shadow
+        #y con el mismo algoritmo de encriptacion sha-512
+        pass_encryp=$(mkpasswd -m sha-512 -S $salt $2)
+        if [ $pass_shadow = $pass_encryp ]; then   
+            echo "contraseña correcta"
+        else
+            echo "contraseña incorrecta"
+        fi 
+    else 
+        echo "el usuario no existe" 
+    fi
+else
+    read -p "$WHOIS no esta instalado. Quieres instalarlo? [Y/n] " -n1 
+    echo
+    case $REPLY in
+        y|Y)
+            sudo apt-get -y install whois;
+            echo "vuelve a ejecutar el script"
+        ;;
+
+        n|N)
+            echo "Debes instalar $WHOIS para poder usar este script"
+        ;;
+        *)
+            echo "Opcion invalida"
+        ;;
+    esac
 fi
